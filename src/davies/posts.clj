@@ -68,12 +68,8 @@
         data-tx {:db/id #db/id[db.part/user]
                  :comment/message (:message params)
                  :comment/post post-id}]
-    (try
-      (db/transact [data-tx])
-      (catch Exception e
-        (println params)
-        (.getMessage e))))
-  (response/redirect "/"))
+    (db/transact [data-tx])
+    (response/redirect "/")))
 
 (defn index [req]
   (let [index-tx '[:find ?e
