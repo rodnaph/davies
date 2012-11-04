@@ -9,7 +9,8 @@
 
 (defroutes app-routes
   (GET "/" [] posts/index)
-  (GET "/post/:id" [] posts/show)
+  (GET "/posts/:id" [] posts/show)
+  (POST "/posts/:id/comments" [] posts/comment)
   (route/resources "/assets")
   (route/not-found "404..."))
 
@@ -18,4 +19,3 @@
     (wrap-reload)
     (wrap-stacktrace)
     (handler/site)))
-
