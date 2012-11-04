@@ -5,10 +5,11 @@
         ring.middleware.stacktrace)
   (:require (compojure [handler :as handler]
                        [route :as route])
-            (davies [pages :as pages])))
+            (davies [posts :as posts])))
 
 (defroutes app-routes
-  (GET "/" [] pages/index)
+  (GET "/" [] posts/index)
+  (GET "/post/:id" [] posts/show)
   (route/resources "/assets")
   (route/not-found "404..."))
 
