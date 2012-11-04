@@ -20,13 +20,14 @@
   (html5
    [:head
     [:title (str "Davies - " title)]
-    (include-css "/assets/bootstrap-2.0/css/bootstrap.css"
+    (include-css "/assets/bootstrap-2.0/css/bootstrap.min.css"
                  "/assets/css/main.css")]
    [:body
     [:div.container
      [:div.row
       [:div.span12
-       [:h1 "My Datomic Blog"]]]
+       [:h1
+        [:a {:href "/"} "My Datomic Blog"]]]]
      content
      [:div.row.footer
       "Davies - A simple blog using Clojure and Datomic"]]]))
@@ -40,8 +41,6 @@
     (layout (:blog/title post)
       [:div.row
        [:div.span12
-        [:div
-         [:a {:href "/"} "Home"]]
         (:blog/body post)]])))
 
 (defn index [req]
