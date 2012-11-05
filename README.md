@@ -1,7 +1,7 @@
 davies
 ======
 
-Davies is a simple blog, just as an experiment using Datomic, it's not for actual use.
+Davies is an awesome blog, just as an experiment using Datomic, it's not for actual use.
 
 Usage
 -----
