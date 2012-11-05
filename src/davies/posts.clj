@@ -45,7 +45,7 @@
 ;; ------
 
 (defn show [{:keys [params]}]
-  (let [id (bigint (:id params))
+  (let [id (Long/parseLong (:id params))
         post (db/entity id)]
     (layout/standard (:blog/title post)
       [:div.row
@@ -64,7 +64,7 @@
          (comment-form id)]]])))
 
 (defn comment [{:keys [params]}]
-  (let [post-id (bigint (:id params))
+  (let [post-id (Long/parseLong (:id params))
         data-tx {:db/id #db/id[db.part/user]
                  :comment/message (:message params)
                  :comment/post post-id}]
