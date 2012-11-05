@@ -61,6 +61,13 @@
    :db/valueType :db.type/ref
    :db/doc "The post a comment belongs to"
    :db.install/_attribute :db.part/db}
+
+  {:db/id #db/id[:db.part/db]
+   :db/cardinality :db.cardinality/one
+   :db/ident :comment/created-at
+   :db/valueType :db.type/instant
+   :db/doc "The time a comment was posted"
+   :db.install/_attribute :db.part/db}
   
 ])
 

@@ -7,7 +7,7 @@
             [davies.layout :as layout]))
 
 (defn- ^{:doc "Turn a post ID into a post summary"}
-  post2summary [id]
+  id2summary [id]
   (let [post (db/entity id)]
     [:div.well
       [:h2
@@ -16,23 +16,23 @@
       [:div.snippet
         (:blog/body post)]]))
 
-(defn- list-posts [posts]
-  (map (comp post2summary first) posts))
-
-(defn- comment-form [id]
-  (let [url (format "/posts/%s/comments" id)]
-    (form-to {:class "form-horizontal"} [:post url]
-             [:div.control-group
-              [:label.control-label "Message:"]
-              [:div.controls
-               (text-area "message")]]
-             [:div.form-actions
-              (submit-button {:class "btn btn-primary"} "Post Comment")])))
-
 (defn- ^{:doc "Turn a comment ID into a rendered comment"}
   id2comment [id]
   (let [comment (db/entity id)]
     [:li (:comment/message comment)]))
+
+(defn- row [title control]
+  [:div.control-group
+   [:label.control-label title]
+   [:div.controls control]])
+
+(defn- comment-form [id]
+  (let [url (format "/posts/%s/comments" id)]
+    (form-to {:class "form-horizontal"} [:post url]
+             (row "Name:" (text-field "author"))
+             (row "Message:" (text-area "message"))
+             [:div.form-actions
+              (submit-button {:class "btn btn-primary"} "Post Comment")])))
 
 (defn- ^{:doc "Fetch all comments for a post"}
   comments-for [post-id]
@@ -66,10 +66,13 @@
 (defn comment [{:keys [params]}]
   (let [post-id (Long/parseLong (:id params))
         data-tx {:db/id #db/id[db.part/user]
+                 :comment/author (:author params)
                  :comment/message (:message params)
-                 :comment/post post-id}]
+                 :comment/created-at (java.util.Date.)
+                 :comment/post post-id}
+        post-url (format "/posts/%s#comments" post-id)]
     (db/transact [data-tx])
-    (response/redirect "/")))
+    (response/redirect post-url)))
 
 (defn index [req]
   (let [index-tx '[:find ?e
@@ -78,7 +81,7 @@
     (layout/standard "Home"
       [:div.row
        [:div.span8
-        (list-posts items)]
+        (map (comp id2summary first) items)]
        [:div.span4
         [:div.well
          [:h3 "Sidebar"]]]])))
