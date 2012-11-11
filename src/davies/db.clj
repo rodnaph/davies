@@ -68,8 +68,15 @@
    :db/valueType :db.type/instant
    :db/doc "The time a comment was posted"
    :db.install/_attribute :db.part/db}
+
+  {:db/id #db/id[:db.part/db]
+   :db/cardinality :db.cardinality/one
+   :db/ident :comment/author
+   :db/valueType :db.type/string
+   :db/doc "The name of a comment's author"
+   :db.install/_attribute :db.part/db}
   
-])
+  ])
 
 (def uri "datomic:free://localhost:4334/davies")
 

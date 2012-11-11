@@ -1,45 +1,63 @@
 
 (ns davies.posts
   (:refer-clojure :exclude [comment])
-  (:use hiccup.form)
+  (:use net.cgrand.enlive-html)
   (:require [ring.util.response :as response]
             [davies.db :as db]
             [davies.layout :as layout]))
 
-(defn- ^{:doc "Turn a post ID into a post summary"}
-  id2summary [id]
-  (let [post (db/entity id)]
-    [:div.well
-      [:h2
-        [:a {:href (format "/posts/%s" (:db/id post))}
-          (:blog/title post)]]
-      [:div.snippet
-        (:blog/body post)]]))
-
-(defn- ^{:doc "Turn a comment ID into a rendered comment"}
-  id2comment [id]
-  (let [comment (db/entity id)]
-    [:li (:comment/message comment)]))
-
-(defn- row [title control]
-  [:div.control-group
-   [:label.control-label title]
-   [:div.controls control]])
-
-(defn- comment-form [id]
-  (let [url (format "/posts/%s/comments" id)]
-    (form-to {:class "form-horizontal"} [:post url]
-             (row "Name:" (text-field "author"))
-             (row "Message:" (text-area "message"))
-             [:div.form-actions
-              (submit-button {:class "btn btn-primary"} "Post Comment")])))
+(defn ^{:doc "Convert entity results to a sequence of entities"}
+  to-entities [col]
+  (map (comp db/entity first) col))
 
 (defn- ^{:doc "Fetch all comments for a post"}
   comments-for [post-id]
   (let [comments-tx '[:find ?e
                       :in $ ?i
                       :where [?e :comment/post ?i]]]
-    (db/query comments-tx post-id)))
+    (to-entities (db/query comments-tx post-id))))
+
+(defn- ^{:doc "Inserts a comment into the database."}
+  insert-comment [{:keys [id author message]}]
+  (let [data-tx {:db/id #db/id[db.part/user]
+                 :comment/author author
+                 :comment/message message
+                 :comment/created-at (java.util.Date.)
+                 :comment/post (Long/parseLong id)}]
+    (db/transact [data-tx])))
+
+(defn ^{:doc "Find posts for the front page"}
+  find-posts []
+  (let [index-tx '[:find ?e
+                   :where [?e :blog/title]]]
+	(to-entities (db/query index-tx))))
+
+(defsnippet tpl-comment "davies/views/comment.html" [:.comment]
+  [comment]
+  [:.author] (content (:comment/author comment))
+  [:p] (content (:comment/message comment)))
+
+(tpl-show {} [])
+
+(defsnippet tpl-show "davies/views/post.html" [:.post]
+  [post comments]
+  [:.title] (content (:blog/title post))
+  [:.body] (html-content (:blog/body post))
+  [:.comments] (content (map #(tpl-comment %) comments))
+  [:form] (set-attr :action
+                    (format "/posts/%d/comments"
+                            (:db/id post))))
+
+(defsnippet tpl-summary "davies/views/summary.html" [:.summary]
+  [post]
+  [:a.title] (do-> (content (:blog/title post))
+  				   (set-attr :href
+                             (format "/posts/%d"
+                                     (:db/id post)))))
+
+(defsnippet tpl-index "davies/views/index.html" [:div.row]
+  [posts]
+  [:ul.posts] (content (map #(tpl-summary %) posts)))
 
 ;; Public
 ;; ------
@@ -47,42 +65,16 @@
 (defn show [{:keys [params]}]
   (let [id (Long/parseLong (:id params))
         post (db/entity id)]
-    (layout/standard (:blog/title post)
-      [:div.row
-       [:div.span12
-        [:div.well
-         [:h2 (:blog/title post)]
-         (:blog/body post)]]]
-      [:div.row
-       [:div.span12
-        [:ul
-         (map (comp id2comment first)
-              (comments-for id))]
-        [:div.well
-         [:h2 "Post Comment"]
-         [:p "To post a comment, just enter your message below and click submit."]
-         (comment-form id)]]])))
+    (layout/standard
+     {:title (:blog/title post)
+      :content (tpl-show post (comments-for id))})))
 
 (defn comment [{:keys [params]}]
-  (let [post-id (Long/parseLong (:id params))
-        data-tx {:db/id #db/id[db.part/user]
-                 :comment/author (:author params)
-                 :comment/message (:message params)
-                 :comment/created-at (java.util.Date.)
-                 :comment/post post-id}
-        post-url (format "/posts/%s#comments" post-id)]
-    (db/transact [data-tx])
-    (response/redirect post-url)))
+  (insert-comment params)
+  (response/redirect
+    (format "/posts/%s#comments" (:id params))))
 
 (defn index [req]
-  (let [index-tx '[:find ?e
-                   :where [?e :blog/title]]
-        items (db/query index-tx)]
-    (layout/standard "Home"
-      [:div.row
-       [:div.span8
-        (map (comp id2summary first) items)]
-       [:div.span4
-        [:div.well
-         [:h3 "Sidebar"]]]])))
-
+  (layout/standard
+   {:title "Home"
+    :content (tpl-index (find-posts))}))
