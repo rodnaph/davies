@@ -32,7 +32,7 @@
                    :where [?e :blog/title]]]
 	(to-entities (db/query index-tx))))
 
-(defsnippet tpl-comment "davies/views/comment.html" [:.comment]
+(defsnippet tpl-comment "davies/views/post.html" [:.comment]
   [comment]
   [:.author] (content (:comment/author comment))
   [:p] (content (:comment/message comment)))
@@ -46,7 +46,7 @@
                     (format "/posts/%d/comments"
                             (:db/id post))))
 
-(defsnippet tpl-summary "davies/views/summary.html" [:.summary]
+(defsnippet tpl-summary "davies/views/index.html" [:.summary]
   [post]
   [:a.title] (do-> (content (:blog/title post))
   				   (set-attr :href
