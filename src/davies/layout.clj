@@ -19,8 +19,8 @@
 
 (deftemplate standard "davies/views/layout.html"
   [params]
-  [:span#title] (content (:title params))
-  [:div.content] (content (:content params)))
+  [:head :title] (append (str " - "(:title params)))
+  [:body :.content] (content (:content params)))
 
 (defsnippet new "davies/views/new.html" [:.row]
   [])
