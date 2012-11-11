@@ -105,3 +105,6 @@
   (d/create-database uri)
   (reset! cnn (d/connect uri))
   (transact schema-tx))
+
+(defn entities [col]
+  (map (comp entity first) col))
