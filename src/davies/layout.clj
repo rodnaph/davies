@@ -22,6 +22,9 @@
   [:span#title] (content (:title params))
   [:div.content] (content (:content params)))
 
+(defsnippet new "davies/views/new.html" [:.row]
+  [])
+
 (defsnippet post "davies/views/post.html" [:.post]
   [post comments]
   [:.title] (content (:blog/title post))

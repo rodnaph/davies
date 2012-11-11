@@ -108,3 +108,7 @@
 
 (defn entities [col]
   (map (comp entity first) col))
+
+(defn ^{:doc "Read the :db/id for the first entity created in the transaction"}
+  id [res-tx]
+  (second (first (:tempids @res-tx))))

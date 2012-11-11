@@ -9,6 +9,8 @@
 
 (defroutes app-routes
   (GET "/" [] posts/index)
+  (GET "/new" [] posts/new)
+  (POST "/new" [] posts/create)
   (GET "/posts/:id" [] posts/show)
   (POST "/posts/:id/comments" [] posts/comment)
   (route/resources "/assets")

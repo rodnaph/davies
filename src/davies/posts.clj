@@ -22,6 +22,13 @@
                  :comment/post (Long/parseLong id)}]
     (db/transact [data-tx])))
 
+(defn- insert-post [{:keys [title body]}]
+  (let [data-tx {:db/id #db/id[db.part/user]
+                 :blog/title title
+                 :blog/body body
+                 :blog/created-at (java.util.Date.)}]
+    (db/id (db/transact [data-tx]))))
+
 (defn ^{:doc "Find posts for the front page"}
   find-posts []
   (let [index-tx '[:find ?e
@@ -47,3 +54,13 @@
   (layout/standard
    {:title "Home"
     :content (layout/index (find-posts))}))
+
+(defn new [req]
+  (layout/standard
+   {:title "Create new post"
+    :content (layout/new)}))
+
+(defn create [{:keys [params]}]
+  (let [id (insert-post params)]
+	(response/redirect
+     (format "/posts/%d" id))))
