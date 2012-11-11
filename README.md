@@ -1,10 +1,10 @@
 davies
 ======
 
-Davies is a simple blog, just as an experiment using Datomic, it's not for actual use.
+Davies is a simple blog, just as an experiment using Datomic and EnLive.  It's not for actual use.
 
-Usage
------
+Hacking
+-------
 
 Just clone the repository then...
 
