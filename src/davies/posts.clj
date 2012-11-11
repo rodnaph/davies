@@ -37,8 +37,6 @@
   [:.author] (content (:comment/author comment))
   [:p] (content (:comment/message comment)))
 
-(tpl-show {} [])
-
 (defsnippet tpl-show "davies/views/post.html" [:.post]
   [post comments]
   [:.title] (content (:blog/title post))
