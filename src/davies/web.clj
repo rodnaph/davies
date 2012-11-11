@@ -2,6 +2,7 @@
 (ns davies.web
   (:use compojure.core
         ring.middleware.reload
+        ring.middleware.flash
         ring.middleware.stacktrace)
   (:require (compojure [handler :as handler]
                        [route :as route])
@@ -19,5 +20,6 @@
 (def app 
   (-> #'app-routes
     (wrap-reload)
+    (wrap-flash)
     (wrap-stacktrace)
     (handler/site)))

@@ -20,6 +20,9 @@
 (deftemplate standard "davies/views/layout.html"
   [params]
   [:head :title] (append (str " - "(:title params)))
+  [:.flash] (if-let [msg (:flash params)]
+              (do-> (content msg)
+                    (add-class "alert alert-success")))
   [:body :.content] (content (:content params)))
 
 (defsnippet new "davies/views/new.html" [:.row]

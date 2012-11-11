@@ -35,20 +35,27 @@
                    :where [?e :blog/title]]]
 	(db/entities (db/query index-tx))))
 
+(defn- redirect [flash url & url-params]
+  (merge {:flash flash}
+    (response/redirect
+      (apply format (cons url url-params)))))
+
 ;; Public
 ;; ------
 
-(defn show [{:keys [params]}]
+(defn show [{:keys [params] :as req}]
   (let [id (Long/parseLong (:id params))
         post (db/entity id)]
     (layout/standard
      {:title (:blog/title post)
+      :flash (:flash req)
       :content (layout/post post (comments-for id))})))
 
 (defn comment [{:keys [params]}]
   (insert-comment params)
-  (response/redirect
-    (format "/posts/%s#comments" (:id params))))
+  (redirect "Your comment was posted!"
+            "/posts/%s#comments"
+            (:id params)))
 
 (defn index [req]
   (layout/standard
@@ -62,5 +69,6 @@
 
 (defn create [{:keys [params]}]
   (let [id (insert-post params)]
-	(response/redirect
-     (format "/posts/%d" id))))
+    (redirect "Your entry was posted!"
+              "/posts/%s"
+              id)))
