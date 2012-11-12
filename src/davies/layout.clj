@@ -32,11 +32,11 @@
   [post comments]
   [:.title] (content (:blog/title post))
   [:.body] (html-content (:blog/body post))
-  [:.comments] (content (map #(post-comment %) comments))
+  [:.comments] (content (map post-comment comments))
   [:form] (set-attr :action
                     (format "/posts/%d/comments"
                             (:db/id post))))
 
 (defsnippet index "davies/views/index.html" [:div.row]
   [posts]
-  [:ul.posts] (content (map #(post-summary %) posts)))
+  [:ul.posts] (content (map post-summary posts)))
